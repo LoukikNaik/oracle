@@ -337,8 +337,13 @@ function buildAttachmentReadyExpression(attachmentNames: string[]): string {
   const namesLiteral = JSON.stringify(attachmentNames.map((name) => name.toLowerCase()));
   return `(() => {
     const names = ${namesLiteral};
+    // Anchor the composer scope on the textarea's <form> ancestor first.
+    // ChatGPT's current DOM has [data-testid*="composer"] matching the "composer-plus-btn"
+    // button (the + attachment opener), whose subtree contains no chip nodes.
+    const textInput = document.querySelector('textarea, [contenteditable="true"]');
     const composer =
-      document.querySelector('[data-testid*="composer"]') ||
+      textInput?.closest('form') ||
+      document.querySelector('[data-testid="composer"]') ||
       document.querySelector('form') ||
       document.body ||
       document;
